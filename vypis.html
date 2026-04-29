@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phõ Diary - Deník</title>
+    <link href="https://fonts.googleapis.com/css2?family=Wellfleet&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #eeeadf; font-family: 'Wellfleet', Arial, sans-serif; padding: 20px; color: #515046; }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 30px; }
+        .review-card { 
+            background: white; padding: 20px; border-radius: 9px; margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: flex; flex-direction: column;
+        }
+        .review-image { width: 100%; max-height: 400px; object-fit: cover; border-radius: 5px; margin-bottom: 15px; }
+        .info { border-bottom: 1px solid #eeeadf; padding-bottom: 10px; margin-bottom: 10px; }
+        .stars { color: gold; font-size: 1.2em; }
+        .notes { font-style: italic; color: #777; }
+        .nav-link { display: block; text-align: center; margin-bottom: 20px; color: #b8d076; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="nav-link">← Zpět na psaní recenze</a>
+        <h1>Naše Phõ zážitky 🍜</h1>
+        <div id="seznam-recenzi">
+            <p style="text-align:center;">Načítám deník...</p>
+        </div>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBT5whwg2BMgrelJ8fAe_zh5j5dcuKiFJU",
+        authDomain: "pho-diary.firebaseapp.com",
+        projectId: "pho-diary",
+        storageBucket: "pho-diary.firebasestorage.app",
+        messagingSenderId: "354843716294",
+        appId: "1:354843716294:web:c19692a6fe0ecab574c5c7",
+        measurementId: "G-32Q4YK9H69"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function nactiRecenze() {
+        const container = document.getElementById('seznam-recenzi');
+        try {
+            const q = query(collection(db, "recenze"), orderBy("casVytvoreni", "desc"));
+            const querySnapshot = await getDocs(q);
+            container.innerHTML = '';
+
+            querySnapshot.forEach((doc) => {
+                const r = doc.data();
+                const card = document.createElement('div');
+                card.className = 'review-card';
+                card.innerHTML = `
+                    ${r.fotka ? `<img src="${r.fotka}" class="review-image">` : ''}
+                    <div class="info">
+                        <strong>${r.restaurace}</strong> (${r.datum})<br>
+                        <span class="stars">${'★'.repeat(r.dojem)}</span>
+                    </div>
+                    <p><strong>Vývar:</strong> ${r.vyvar}/5 | <strong>Maso:</strong> ${r.maso}/5</p>
+                    <p><strong>Zelenina:</strong> ${r.zelenina}</p>
+                    <p class="notes">${r.poznamky}</p>
+                `;
+                container.appendChild(card);
+            });
+        } catch (e) {
+            container.innerHTML = "Chyba při načítání dat.";
+            console.error(e);
+        }
+    }
+    nactiRecenze();
+</script>
+</body>
+</html>
