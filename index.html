@@ -350,30 +350,100 @@ button[type="submit"]:hover {
             </form>
     </div>
 
-<script>
-    // Získáme odkazy na prvky, se kterými budeme pracovat
+<script type="module">
+    // 1. Import nástrojů z Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-storage.js";
+
+    // 2. Tvá Firebase konfigurace
+    const firebaseConfig = {
+        apiKey: "AIzaSyBT5whwg2BMgrelJ8fAe_zh5j5dcuKiFJU",
+        authDomain: "pho-diary.firebaseapp.com",
+        projectId: "pho-diary",
+        storageBucket: "pho-diary.firebasestorage.app",
+        messagingSenderId: "354843716294",
+        appId: "1:354843716294:web:c19692a6fe0ecab574c5c7",
+        measurementId: "G-32Q4YK9H69"
+    };
+
+    // 3. Spuštění databáze
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    // 4. Původní logika pro náhled fotky
     const uploadInput = document.getElementById('fotka-upload');
     const previewImage = document.getElementById('preview-image');
     const uploadText = document.getElementById('upload-text');
 
-    // Vytvoříme funkci, která se spustí, když uživatel vybere soubor
     uploadInput.addEventListener('change', function() {
-        // Zkontrolujeme, zda byl nějaký soubor vybrán
         if (this.files && this.files[0]) {
             const reader = new FileReader();
-
-            // Tato funkce se spustí, až bude soubor načten
             reader.onload = function(e) {
-                // 1. Zobrazíme obrázek (skryjeme původní text)
-                previewImage.src = e.target.result; // Nastavíme zdroj obrázku
-                previewImage.style.display = 'block'; // Zobrazíme prvek
-                
-                // 2. Skryjeme text "Nahrát fotku"
+                previewImage.src = e.target.result;
+                previewImage.style.display = 'block';
                 uploadText.style.display = 'none'; 
             }
-
-            // Načteme soubor jako URL řetězec
             reader.readAsDataURL(this.files[0]);
+        }
+    });
+
+    // 5. Odeslání formuláře do databáze
+    const form = document.querySelector('form');
+    const submitBtn = document.querySelector('button[type="submit"]');
+
+    form.addEventListener('submit', async function(event) {
+        // Zabráníme klasickému obnovení stránky
+        event.preventDefault(); 
+        
+        // Změníme text tlačítka a na chvíli ho vypneme
+        submitBtn.textContent = 'Ukládám... 🍜';
+        submitBtn.disabled = true;
+
+        try {
+            // Zjištění vybraných hvězdiček
+            const dojem = document.querySelector('input[name="dojem"]:checked')?.value || 0;
+            const vyvar = document.querySelector('input[name="vyvar"]:checked')?.value || 0;
+            const maso = document.querySelector('input[name="maso"]:checked')?.value || 0;
+
+            let imageUrl = "";
+
+            // Odeslání fotky, pokud byla vybrána
+            if (uploadInput.files.length > 0) {
+                const file = uploadInput.files[0];
+                // Vytvoříme unikátní název fotky pomocí aktuálního data
+                const storageRef = ref(storage, 'fotky/' + Date.now() + '_' + file.name);
+                await uploadBytes(storageRef, file);
+                imageUrl = await getDownloadURL(storageRef);
+            }
+
+            // Uložení textů a hvězdiček do databáze Firestore
+            await addDoc(collection(db, "recenze"), {
+                restaurace: document.getElementById('restaurace').value,
+                datum: document.getElementById('datum').value,
+                dojem: Number(dojem),
+                vyvar: Number(vyvar),
+                maso: Number(maso),
+                zelenina: document.getElementById('zelenina').value,
+                poznamky: document.getElementById('poznamky').value,
+                fotka: imageUrl, // Uloží odkaz na právě nahranou fotku
+                casVytvoreni: new Date()
+            });
+
+            // Úspěch! Vyčistíme formulář
+            alert('Recenze byla úspěšně uložena do deníku!');
+            form.reset();
+            previewImage.style.display = 'none';
+            uploadText.style.display = 'block';
+
+        } catch (error) {
+            console.error("Chyba při ukládání: ", error);
+            alert('Jejda, něco se pokazilo. Zkontroluj připojení a zkus to znovu.');
+        } finally {
+            // Vrátíme tlačítko do původního stavu
+            submitBtn.textContent = 'Uložit recenzi';
+            submitBtn.disabled = false;
         }
     });
 </script>
