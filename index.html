@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phõ Diary Review</title>
+    
+<link href="https://fonts.googleapis.com/css2?family=Wellfleet&display=swap" rel="stylesheet">
+<style>
+/* ----------------------------------------------------
+   1. Základní nastavení (Reset a Písmo)
+   ---------------------------------------------------- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Wellfleet', Arial, sans-serif;
+}
+
+body {
+    background-color: #eeeadf; 
+    color: #515046; 
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    font-family: 'Wellfleet', Arial, sans-serif;
+}
+
+/* ----------------------------------------------------
+   2. Styl pro Kontejner recenze (Review Form)
+   ---------------------------------------------------- */
+.review-form {
+    background-color: #FFFFfF; 
+    padding: 40px 40px;
+    margin-top: 30px;
+    border-radius: 9px; 
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); 
+    width: 100%;
+    max-width: 600px; 
+}
+
+/* ----------------------------------------------------
+   3. Styl pro Skupiny polí (Form Group)
+   ---------------------------------------------------- */
+
+/* Flexbox pro zarovnání: Popisek a pole vedle sebe */
+.form-group, .rating-group {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center; 
+    margin-bottom: 15px; 
+}
+
+/* Stylování popisků */
+.form-group label, .rating-group label {
+    display: inline-block;
+    min-width: 150px; 
+    font-weight: normal;
+    margin-right: 15px; 
+    margin-bottom: 0; 
+    font-size: 1em;
+}
+
+/* Stylování vstupních polí */
+input[type="text"], 
+input[type="date"], 
+textarea {
+    flex-grow: 1; 
+    width: auto; 
+    padding: 10px 10px 10px 15px; 
+    border: none; 
+    border-bottom: 2px solid #515046; 
+    background-color: #eeeadf;
+    font-size: 1em;
+    transition: border-bottom-color 0.3s; 
+}
+
+input:focus, textarea:focus {
+    border-bottom-color: #515046; 
+    outline: none; 
+}
+
+textarea {
+    resize: vertical; 
+}
+
+/* Pro textarea (Poznámky) - zarovnání popisku nahoře */
+.form-group:nth-child(9) { 
+    align-items: flex-start;
+}
+
+
+/* ----------------------------------------------------
+   4. Tlačítko (Button)
+   ---------------------------------------------------- */
+button[type="submit"] {
+    display: block;
+    width: 250px;
+    margin: 75px auto 0; 
+    padding: 15px;
+    background-color: #b8d076; 
+    color: white;
+    font-size: 1.1em;
+    font-weight: normal;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer; 
+    transition: background-color 0.3s;
+}
+
+button[type="submit"]:hover {
+    background-color: #7b1a1a; 
+}
+
+/* ----------------------------------------------------
+   5. Pole pro Fotku (File Input) - SKRYTO V RÁMEČKU
+   ---------------------------------------------------- */
+.photo-frame input[type="file"] {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    opacity: 0; 
+    cursor: pointer;
+    z-index: 10; 
+}
+
+
+/* ----------------------------------------------------
+   6. Styl pro Hvězdičkové hodnocení
+   ---------------------------------------------------- */
+
+.stars {
+    display: flex;
+    flex-direction: row-reverse; 
+    justify-content: flex-end; 
+    font-size: 2em; 
+    color: #ccc; 
+    word-spacing: -0.4em; 
+    line-height: 1.0; 
+    flex-grow: 1; 
+}
+
+/* Skryjeme původní rádiová tlačítka */
+.stars input {
+    display: none;
+}
+
+/* Stylování popisku (hvězdy) - TVÉ HODNOTY JSOU ZACHOVÁNY */
+.stars label {
+    cursor: pointer; 
+    font-weight: normal; 
+    padding: 0; 
+    margin: 0; 
+    min-width: 40px;
+    line-height: 1.0;
+}
+
+/* Když uživatel najede myší, obarvíme hvězdu a všechny před ní */
+.stars label:hover,
+.stars label:hover ~ label,
+.stars input:checked ~ label {
+    color: gold; 
+}
+
+/* Odstranění nežádoucí linky */
+.rating-group input {
+    border-bottom: none;
+    padding: 0;
+}
+
+/* ----------------------------------------------------
+   8. Styl pro Rámeček na fotku (Polaroid) - FINÁLNÍ OPRAVA
+   ---------------------------------------------------- */
+
+.photo-frame {
+    width: 300px; 
+    height: 300px; 
+    background-color: #eeeadf; 
+    padding: 0; 
+    position: relative; 
+    overflow: hidden; 
+    
+    /* Dekorace */
+    background-image: url('cibule.png'), url('pap.png'), url('limdole.png'), url('bady.png'); 
+    background-repeat: no-repeat;
+    background-position: bottom right, top left, bottom left, top right;
+    background-size: 60px, 50px, 55px, 40px;
+
+    /* POLAROID TRIK: box-shadow pro vytvoření tlustého bílého rámečku */
+    box-shadow: 
+        0 0 0 10px #e2ddcd, /* Tenký bílý rámeček */
+        0 35px 0 10px #e2ddcd, /* Tlustý spodní bílý okraj */
+        0 6px 15px rgba(0, 0, 0, 0.1); /* Vnější stín */
+    
+    /* Nastavení pro obsah */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    
+    border-radius: 1px; 
+    margin: 40px auto; 
+}
+
+/* Styl pro náhled fotky, aby vyplnil prostor */
+.photo-frame #preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2; 
+}
+
+/* ----------------------------------------------------
+   10. Styl pro Nadpis UVNITŘ formuláře
+   ---------------------------------------------------- */
+
+.form-heading-container {
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    margin-bottom: 30px; 
+}
+
+.form-heading-container h1 {
+    margin: 0 10px; 
+    font-size: 2em; 
+    color: #515046; 
+    text-align: center;
+}
+
+.heading-image {
+    height: **10**px; 
+    width: 90px; 
+    object-fit: contain; 
+    margin-right: 15px;
+    vertical-align: middle; 
+}
+
+.heading-image.right {
+    transform: scaleX(-1); 
+}
+
+/* --- Úpravy pro mobilní telefony --- */
+@media (max-width: 600px) {
+    .review-form {
+        padding: 20px 15px; /* Zmenší tlusté okraje rámečku */
+    }
+    
+    .form-group, .rating-group {
+        flex-direction: column; /* Hodí políčko pod popisek */
+        align-items: flex-start;
+    }
+
+    .form-group label, .rating-group label {
+        margin-bottom: 8px; /* Udělá malou mezeru pod popiskem */
+    }
+
+    input[type="text"], input[type="date"], textarea {
+        width: 100%; /* Roztáhne políčko bezpečně na celou šířku okna */
+    }
+
+    .photo-frame {
+        width: 250px; /* Zmenší fotku, aby se vešla na malý displej */
+        height: 250px;
+    }
+
+    .form-heading-container h1 {
+        font-size: 1.5em; /* Lehce zmenší nadpis */
+    }
+    
+    .heading-image {
+        width: 60px; /* Zmenší misky s polévkou */
+    }
+}
+</style>
+    </head>
+<body>
+    
+    <div class="review-form">
+    
+       <div class="form-heading-container">
+            <img src="pho.png" alt="Dekorativní obrázek" class="heading-image left">
+            <h1>Phõ review diary</h1>
+            <img src="pho.png" alt="Dekorativní obrázek" class="heading-image right">
+        </div>
+
+        <form>
+
+<div class="form-group">
+        <label for="restaurace">Místo/Restaurace:</label>
+        <input type="text" id="restaurace" name="restaurace">
+    </div>
+
+    <div class="form-group">
+        <label for="datum">Datum návštěvy:</label>
+        <input type="date" id="datum" name="datum">
+    </div>
+
+<div class="rating-group">
+        <label>Celkový dojem:</label>
+        <div class="stars">
+            <input type="radio" id="dojem-5" name="dojem" value="5" required><label for="dojem-5">★</label> <input type="radio" id="dojem-4" name="dojem" value="4"><label for="dojem-4">★</label> <input type="radio" id="dojem-3" name="dojem" value="3"><label for="dojem-3">★</label> <input type="radio" id="dojem-2" name="dojem" value="2"><label for="dojem-2">★</label> <input type="radio" id="dojem-1" name="dojem" value="1"><label for="dojem-1">★</label>
+        </div>
+    </div>
+
+    <div class="rating-group">
+        <label>Chuť vývaru:</label>
+        <div class="stars">
+            <input type="radio" id="vyvar-5" name="vyvar" value="5" required><label for="vyvar-5">★</label> <input type="radio" id="vyvar-4" name="vyvar" value="4"><label for="vyvar-4">★</label> <input type="radio" id="vyvar-3" name="vyvar" value="3"><label for="vyvar-3">★</label> <input type="radio" id="vyvar-2" name="vyvar" value="2"><label for="vyvar-2">★</label> <input type="radio" id="vyvar-1" name="vyvar" value="1"><label for="vyvar-1">★</label>
+        </div>
+    </div>
+
+    
+    <div class="form-group">
+        <label for="maso">Maso:</label>
+
+ <div class="stars">
+            <input type="radio" id="maso-5" name="maso" value="5" required><label for="maso-5">★</label> <input type="radio" id="maso-4" name="maso" value="4"><label for="maso-4">★</label> <input type="radio" id="maso-3" name="maso" value="3"><label for="maso-3">★</label> <input type="radio" id="maso-2" name="maso" value="2"><label for="maso-2">★</label> <input type="radio" id="maso-1" name="maso" value="1"><label for="maso-1">★</label>
+        </div>
+    </div>
+
+<div class="form-group">
+        <label for="zelenina">Zelenina:</label>
+        <input type="text" id="zelenina" name="zelenina">
+    </div>
+
+    <div class="form-group">
+        <label for="poznamky">Poznámky:</label>
+        <textarea id="poznamky" name="poznamky" rows="3"></textarea>
+    </div>
+
+ 
+    
+    <div class="photo-frame">
+        <img id="preview-image" src="" alt="Náhled Pho Recenze" style="display: none;">
+
+        <p id="upload-text" style="color: #ccc; font-size: 1.4em; font-weight: normal; font-style: italic; z-index: 5;">Nahrát fotku</p>
+        
+        <input type="file" id="fotka-upload" name="fotka" accept="image/*">
+    </div>
+
+
+    <button type="submit">Uložit recenzi</button>
+            </form>
+    </div>
+
+<script>
+    // Získáme odkazy na prvky, se kterými budeme pracovat
+    const uploadInput = document.getElementById('fotka-upload');
+    const previewImage = document.getElementById('preview-image');
+    const uploadText = document.getElementById('upload-text');
+
+    // Vytvoříme funkci, která se spustí, když uživatel vybere soubor
+    uploadInput.addEventListener('change', function() {
+        // Zkontrolujeme, zda byl nějaký soubor vybrán
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+
+            // Tato funkce se spustí, až bude soubor načten
+            reader.onload = function(e) {
+                // 1. Zobrazíme obrázek (skryjeme původní text)
+                previewImage.src = e.target.result; // Nastavíme zdroj obrázku
+                previewImage.style.display = 'block'; // Zobrazíme prvek
+                
+                // 2. Skryjeme text "Nahrát fotku"
+                uploadText.style.display = 'none'; 
+            }
+
+            // Načteme soubor jako URL řetězec
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+</script>
+</body>
+</html>
